@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from vehicles.models import Vehicle
 from drivers.models import Driver
 from trips.models import Trip
@@ -29,6 +30,14 @@ def index(request):
     if total_active_fleet > 0:
         fleet_utilization = (active_vehicles / total_active_fleet) * 100
         
+    recent_revenue_trips = Trip.objects.exclude(revenue__isnull=True).order_by('-created_at')[:15]
+    recent_revenue_trips = list(recent_revenue_trips)[::-1]
+    revenue_labels = [f"Trip {t.id}" for t in recent_revenue_trips]
+    revenue_data = [float(t.revenue) for t in recent_revenue_trips]
+    
+    total_revenue_aggr = Trip.objects.aggregate(total=Sum('revenue'))
+    total_revenue = float(total_revenue_aggr['total'] or 0)
+        
     context = {
         'active_vehicles': active_vehicles,
         'available_vehicles': available_vehicles,
@@ -37,5 +46,8 @@ def index(request):
         'pending_trips': pending_trips,
         'drivers_on_duty': drivers_on_duty,
         'fleet_utilization': round(fleet_utilization, 1),
+        'revenue_labels': revenue_labels,
+        'revenue_data': revenue_data,
+        'total_revenue': total_revenue,
     }
     return render(request, 'dashboard/index.html', context)

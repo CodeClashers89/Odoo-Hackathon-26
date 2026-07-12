@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Details - TransitOps{% endblock %}
+{% block page_title %}Vehicle Details{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h3 style="margin: 0; font-weight: 600; color: var(--text);">{{ vehicle.registration_number }}</h3>
+        <span class="badge 
+            {% if vehicle.status == 'Available' %}badge-success
+            {% elif vehicle.status == 'On Trip' %}badge-info
+            {% elif vehicle.status == 'In Shop' %}badge-warning
+            {% else %}badge-ghost{% endif %}">
+            {{ vehicle.status }}
+        </span>
+    </div>
+
+    <div class="grid grid-cols-2" style="gap: 16px; margin-bottom: 24px;">
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Make & Model</div>
+            <div style="font-weight: 500;">{{ vehicle.name_model }}</div>
+        </div>
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Vehicle Type</div>
+            <div style="font-weight: 500;">{{ vehicle.vehicle_type }}</div>
+        </div>
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Max Load Capacity</div>
+            <div style="font-weight: 500;">{{ vehicle.max_load_capacity }} kg</div>
+        </div>
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Current Odometer</div>
+            <div style="font-weight: 500;">{{ vehicle.odometer }} km</div>
+        </div>
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Acquisition Cost</div>
+            <div style="font-weight: 500;">₹{{ vehicle.acquisition_cost }}</div>
+        </div>
+        <div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Registration Expiry</div>
+            <div style="font-weight: 500;">{{ vehicle.registration_expiry_date }}</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: flex-end;">
+        <a href="{% url 'vehicles_list' %}" class="btn btn-ghost">Back to List</a>
+        {% if user.profile.role in 'Fleet Manager,Admin' %}
+        <a href="{% url 'vehicle_edit' vehicle.id %}" class="btn btn-primary">Edit Vehicle</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

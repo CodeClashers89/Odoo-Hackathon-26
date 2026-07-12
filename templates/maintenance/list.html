@@ -30,7 +30,7 @@
                     <td>{{ log.started_at|date:"M d, Y" }}</td>
                     <td style="font-weight: 500;">{{ log.vehicle.registration_number }}</td>
                     <td>{{ log.maintenance_type }}</td>
-                    <td>${{ log.cost }}</td>
+                    <td>₹{{ log.cost }}</td>
                     <td>
                         <span class="badge 
                             {% if log.status == 'Active' %}badge-warning

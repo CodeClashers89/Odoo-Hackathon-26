@@ -19,7 +19,18 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="{{ form.maintenance_type.id_for_label }}">Maintenance Type (e.g., Oil Change, Tire Replacement)</label>
+            <label class="form-label">Maintenance Category</label>
+            <select id="maintenance_category" class="form-control">
+                <option value="Oil Change">Oil Change</option>
+                <option value="Tire Replacement">Tire Replacement</option>
+                <option value="Brake Inspection">Brake Inspection</option>
+                <option value="Engine Repair">Engine Repair</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="other_reason_group" style="display: none;">
+            <label class="form-label" for="{{ form.maintenance_type.id_for_label }}">Reason (Please specify)</label>
             {{ form.maintenance_type }}
             {{ form.maintenance_type.errors }}
         </div>
@@ -31,7 +42,7 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="{{ form.cost.id_for_label }}">Cost ($)</label>
+            <label class="form-label" for="{{ form.cost.id_for_label }}">Cost (₹)</label>
             {{ form.cost }}
             {{ form.cost.errors }}
         </div>
@@ -42,4 +53,38 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('maintenance_category');
+    const otherGroup = document.getElementById('other_reason_group');
+    const typeInput = document.getElementById('id_maintenance_type');
+    const predefined = ['Oil Change', 'Tire Replacement', 'Brake Inspection', 'Engine Repair'];
+
+    function updateFields() {
+        if (categorySelect.value === 'Other') {
+            otherGroup.style.display = 'block';
+            if (predefined.includes(typeInput.value)) {
+                typeInput.value = '';
+            }
+        } else {
+            otherGroup.style.display = 'none';
+            typeInput.value = categorySelect.value;
+        }
+    }
+
+    categorySelect.addEventListener('change', updateFields);
+
+    if (typeInput.value) {
+        if (!predefined.includes(typeInput.value)) {
+            categorySelect.value = 'Other';
+        } else {
+            categorySelect.value = typeInput.value;
+        }
+    }
+    updateFields();
+});
+</script>
 {% endblock %}

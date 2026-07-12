@@ -27,6 +27,8 @@
                     <th>Registration</th>
                     <th>Model</th>
                     <th>Type</th>
+                    <th>Max Load (kg)</th>
+                    <th>Cost (₹)</th>
                     <th>Status</th>
                     <th>Odometer (km)</th>
                     <th>Actions</th>
@@ -38,6 +40,8 @@
                     <td style="font-weight: 500;">{{ vehicle.registration_number }}</td>
                     <td>{{ vehicle.name_model }}</td>
                     <td>{{ vehicle.vehicle_type }}</td>
+                    <td>{{ vehicle.max_load_capacity }}</td>
+                    <td>₹{{ vehicle.acquisition_cost }}</td>
                     <td>
                         <span class="badge 
                             {% if vehicle.status == 'Available' %}badge-success
@@ -48,13 +52,16 @@
                         </span>
                     </td>
                     <td>{{ vehicle.odometer }}</td>
-                    <td>
-                        <button class="btn btn-ghost btn-sm">View</button>
+                    <td style="display: flex; gap: 8px;">
+                        <a href="{% url 'vehicle_detail' vehicle.id %}" class="btn btn-ghost btn-sm">View</a>
+                        {% if user.profile.role in 'Fleet Manager,Admin' %}
+                        <a href="{% url 'vehicle_edit' vehicle.id %}" class="btn btn-ghost btn-sm">Edit</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No vehicles found.</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No vehicles found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

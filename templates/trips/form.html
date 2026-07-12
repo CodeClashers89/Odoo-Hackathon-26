@@ -1,62 +1,263 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Trip - TransitOps{% endblock %}
-{% block page_title %}Create Trip{% endblock %}
+{% block title %}{{ action|default:"Create" }} Trip - TransitOps{% endblock %}
+{% block page_title %}{{ action|default:"Create" }} Trip{% endblock %}
+
+{% block extra_head %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    .trip-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+        height: 100%;
+    }
+    #map {
+        height: 600px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--border);
+        z-index: 1;
+    }
+    @media (max-width: 900px) {
+        .trip-container {
+            grid-template-columns: 1fr;
+        }
+        #map {
+            height: 400px;
+            margin-bottom: 24px;
+        }
+    }
+    .map-instructions {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 1000;
+        background: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 600px;">
-    <form method="post">
-        {% csrf_token %}
-        
-        <div class="grid grid-cols-2" style="gap: 16px;">
-            <div class="form-group">
-                <label class="form-label" for="{{ form.source.id_for_label }}">Source</label>
-                {{ form.source }}
-                {{ form.source.errors }}
+<div class="trip-container">
+    <div class="card" style="margin-bottom: 0;">
+        <h3 style="margin-bottom: 20px; font-weight: 600; color: var(--text);">Trip Details</h3>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-2" style="gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.source.id_for_label }}">Source</label>
+                    {{ form.source }}
+                    {{ form.source.errors }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.destination.id_for_label }}">Destination</label>
+                    {{ form.destination }}
+                    {{ form.destination.errors }}
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label" for="{{ form.destination.id_for_label }}">Destination</label>
-                {{ form.destination }}
-                {{ form.destination.errors }}
-            </div>
-        </div>
 
-        <div class="grid grid-cols-2" style="gap: 16px;">
-            <div class="form-group">
-                <label class="form-label" for="{{ form.vehicle.id_for_label }}">Vehicle (Available only)</label>
-                {{ form.vehicle }}
-                {{ form.vehicle.errors }}
+            <div class="grid grid-cols-2" style="gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.vehicle.id_for_label }}">Vehicle (Available only)</label>
+                    {{ form.vehicle }}
+                    {{ form.vehicle.errors }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.driver.id_for_label }}">Driver (Available & Valid License)</label>
+                    {{ form.driver }}
+                    {{ form.driver.errors }}
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label" for="{{ form.driver.id_for_label }}">Driver (Available & Valid License)</label>
-                {{ form.driver }}
-                {{ form.driver.errors }}
-            </div>
-        </div>
 
-        <div class="grid grid-cols-2" style="gap: 16px;">
-            <div class="form-group">
-                <label class="form-label" for="{{ form.cargo_weight.id_for_label }}">Cargo Weight (kg)</label>
-                {{ form.cargo_weight }}
-                {{ form.cargo_weight.errors }}
+            <div class="grid grid-cols-2" style="gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.cargo_weight.id_for_label }}">Cargo Weight (kg)</label>
+                    {{ form.cargo_weight }}
+                    {{ form.cargo_weight.errors }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.planned_distance.id_for_label }}">Planned Distance (km)</label>
+                    {{ form.planned_distance }}
+                    {{ form.planned_distance.errors }}
+                </div>
             </div>
+
             <div class="form-group">
-                <label class="form-label" for="{{ form.planned_distance.id_for_label }}">Planned Distance (km)</label>
-                {{ form.planned_distance }}
-                {{ form.planned_distance.errors }}
+                <label class="form-label" for="{{ form.revenue.id_for_label }}">Trip Revenue (₹)</label>
+                {{ form.revenue }}
+                {{ form.revenue.errors }}
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="form-label" for="{{ form.revenue.id_for_label }}">Trip Revenue (Optional)</label>
-            {{ form.revenue }}
-            {{ form.revenue.errors }}
-        </div>
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+                <a href="{% url 'trips_list' %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ action|default:"Create" }} Trip</button>
+            </div>
+        </form>
+    </div>
 
-        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
-            <a href="{% url 'trips_list' %}" class="btn btn-ghost">Cancel</a>
-            <button type="submit" class="btn btn-primary">Create Trip</button>
+    <div style="position: relative; display: flex; flex-direction: column; height: 100%;">
+        <div style="margin-bottom: 12px; display: flex; gap: 8px;">
+            <button type="button" id="btn-set-source" class="btn" style="flex: 1; background-color: #10B981; color: white; border: 2px solid #047857; font-weight: bold;">1. Set Source</button>
+            <button type="button" id="btn-set-dest" class="btn btn-ghost" style="flex: 1; border: 2px solid transparent;">2. Set Destination</button>
         </div>
-    </form>
+        <div id="map" style="flex-grow: 1;"></div>
+        <div class="map-instructions" style="top: 60px;">
+            <span id="instruction-text">📍 Click on the map to set Source</span>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Initialize Map
+    // Default center (San Francisco roughly)
+    const defaultCenter = [37.7749, -122.4194];
+    const map = L.map('map').setView(defaultCenter, 10);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // 2. Custom Icons
+    const createIcon = (color) => {
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color:${color}; width:24px; height:24px; border-radius:50%; border:3px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+    };
+
+    const sourceIcon = createIcon('#10B981'); // Green
+    const destIcon = createIcon('#EF4444'); // Red
+
+    // 3. Markers and Line
+    let sourceMarker = L.marker([37.75, -122.45], {draggable: false, icon: sourceIcon}).addTo(map).bindPopup("Source");
+    let destMarker = L.marker([37.80, -122.40], {draggable: false, icon: destIcon}).addTo(map).bindPopup("Destination");
+    let polyline = L.polyline([sourceMarker.getLatLng(), destMarker.getLatLng()], {color: '#4F46E5', weight: 4, opacity: 0.8, dashArray: '10, 10'}).addTo(map);
+
+    const sourceInput = document.getElementById('id_source');
+    const destInput = document.getElementById('id_destination');
+    const distanceInput = document.getElementById('id_planned_distance');
+
+    // State for clicking
+    let currentMode = 'source'; // 'source' or 'dest'
+    const btnSource = document.getElementById('btn-set-source');
+    const btnDest = document.getElementById('btn-set-dest');
+    const instructionText = document.getElementById('instruction-text');
+
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 'source') {
+            btnSource.style.backgroundColor = '#10B981';
+            btnSource.style.color = 'white';
+            btnSource.style.borderColor = '#047857';
+            
+            btnDest.style.backgroundColor = 'transparent';
+            btnDest.style.color = 'var(--text)';
+            btnDest.style.borderColor = 'transparent';
+            
+            instructionText.innerText = "📍 Click on the map to set Source";
+        } else {
+            btnDest.style.backgroundColor = '#EF4444';
+            btnDest.style.color = 'white';
+            btnDest.style.borderColor = '#B91C1C';
+            
+            btnSource.style.backgroundColor = 'transparent';
+            btnSource.style.color = 'var(--text)';
+            btnSource.style.borderColor = 'transparent';
+            
+            instructionText.innerText = "📍 Click on the map to set Destination";
+        }
+    }
+
+    btnSource.addEventListener('click', () => setMode('source'));
+    btnDest.addEventListener('click', () => setMode('dest'));
+
+    // 4. Update Function
+    function updateRoute() {
+        const sLatlng = sourceMarker.getLatLng();
+        const dLatlng = destMarker.getLatLng();
+        
+        polyline.setLatLngs([sLatlng, dLatlng]);
+        
+        // Calculate Distance in km
+        const distance = (sLatlng.distanceTo(dLatlng) / 1000).toFixed(2);
+        distanceInput.value = distance;
+    }
+
+    async function reverseGeocode(lat, lng, inputElement) {
+        try {
+            inputElement.placeholder = "Locating...";
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            if (data && data.display_name) {
+                const parts = data.display_name.split(',');
+                inputElement.value = parts.slice(0, 3).join(',').trim();
+            }
+        } catch (e) {
+            console.error("Geocoding failed", e);
+        }
+    }
+
+    // 5. Map Click Event
+    map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        
+        if (currentMode === 'source') {
+            sourceMarker.setLatLng(e.latlng);
+            reverseGeocode(lat, lng, sourceInput);
+            updateRoute();
+            // Automatically switch to setting destination to save a click
+            setMode('dest');
+        } else {
+            destMarker.setLatLng(e.latlng);
+            reverseGeocode(lat, lng, destInput);
+            updateRoute();
+        }
+    });
+
+    // Try to get user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            const newCenter = [userLat, userLng];
+            map.setView(newCenter, 12);
+            
+            sourceMarker.setLatLng([userLat, userLng - 0.02]);
+            destMarker.setLatLng([userLat + 0.02, userLng + 0.02]);
+            
+            updateRoute();
+            reverseGeocode(sourceMarker.getLatLng().lat, sourceMarker.getLatLng().lng, sourceInput);
+            reverseGeocode(destMarker.getLatLng().lat, destMarker.getLatLng().lng, destInput);
+        });
+    }
+
+    // Initial load
+    updateRoute();
+});
+</script>
 {% endblock %}

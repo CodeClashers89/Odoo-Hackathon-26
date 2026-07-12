@@ -38,6 +38,22 @@
                     </td>
                     <td>{{ driver.safety_score }}</td>
                     <td>
+                        {% if user.profile.role in 'Safety Officer,Admin' %}
+                        <form method="post" action="{% url 'driver_update_status' driver.id %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()" class="form-control" style="padding: 4px 8px; font-size: 12px; height: auto; border-radius: 12px; font-weight: 600; width: auto; cursor: pointer; outline: none; border: 1px solid transparent; text-align: center;
+                                {% if driver.status == 'Available' %}background-color: rgba(16, 185, 129, 0.1); color: #10B981;
+                                {% elif driver.status == 'On Trip' %}background-color: rgba(59, 130, 246, 0.1); color: #3B82F6;
+                                {% elif driver.status == 'Off Duty' %}background-color: rgba(245, 158, 11, 0.1); color: #F59E0B;
+                                {% else %}background-color: rgba(239, 68, 68, 0.1); color: #EF4444;{% endif %}
+                            ">
+                                <option value="Available" {% if driver.status == 'Available' %}selected{% endif %}>Available</option>
+                                <option value="On Trip" {% if driver.status == 'On Trip' %}selected{% endif %}>On Trip</option>
+                                <option value="Off Duty" {% if driver.status == 'Off Duty' %}selected{% endif %}>Off Duty</option>
+                                <option value="Suspended" {% if driver.status == 'Suspended' %}selected{% endif %}>Suspended</option>
+                            </select>
+                        </form>
+                        {% else %}
                         <span class="badge 
                             {% if driver.status == 'Available' %}badge-success
                             {% elif driver.status == 'On Trip' %}badge-info
@@ -45,9 +61,12 @@
                             {% else %}badge-danger{% endif %}">
                             {{ driver.status }}
                         </span>
+                        {% endif %}
                     </td>
                     <td>
-                        <button class="btn btn-ghost btn-sm">View</button>
+                        {% if user.profile.role in 'Safety Officer,Admin' %}
+                        <a href="{% url 'driver_edit' driver.id %}" class="btn btn-ghost btn-sm">Edit</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}

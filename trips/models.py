@@ -20,7 +20,7 @@ class Trip(models.Model):
     planned_distance = models.DecimalField(max_digits=10, decimal_places=2, help_text="in km")
     actual_distance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     fuel_consumed = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    revenue = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Trip Revenue for ROI calculation")
+    revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, help_text="Trip Revenue for ROI calculation")
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Draft')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

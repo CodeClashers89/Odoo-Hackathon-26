@@ -20,8 +20,9 @@
                     <th>Route</th>
                     <th>Vehicle</th>
                     <th>Driver</th>
-                    <th>Security Officer</th>
                     <th>Status</th>
+                    <th>Est. Fuel Cost</th>
+                    <th>Revenue</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -32,7 +33,6 @@
                     <td>{{ trip.source }} &rarr; {{ trip.destination }}</td>
                     <td>{{ trip.vehicle.registration_number }}</td>
                     <td>{{ trip.driver.name }}</td>
-                    <td>{{ trip.security_officer.get_full_name|default:trip.security_officer.username|default:"-" }}</td>
                     <td>
                         <span class="badge 
                             {% if trip.status == 'Completed' %}badge-success
@@ -42,6 +42,8 @@
                             {{ trip.status }}
                         </span>
                     </td>
+                    <td><span style="color: #10B981; font-weight: 500;">₹{{ trip.estimated_fuel_cost|floatformat:0 }}</span></td>
+                    <td><span style="color: #4F46E5; font-weight: 600;">₹{{ trip.revenue|floatformat:0 }}</span></td>
                     <td>
                         <div style="display: flex; gap: 8px;">
                             <a href="{% url 'trip_detail' trip.id %}" class="btn btn-ghost btn-sm">View</a>
@@ -65,7 +67,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No trips found.</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No trips found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -31,7 +31,9 @@ def trip_create(request):
                     cargo_weight=form.cleaned_data['cargo_weight'],
                     planned_distance=form.cleaned_data['planned_distance'],
                     revenue=form.cleaned_data['revenue'],
-                    user=request.user
+                    user=request.user,
+                    fuel_type=form.cleaned_data.get('fuel_type', 'Diesel'),
+                    estimated_fuel_cost=form.cleaned_data.get('estimated_fuel_cost') or 0,
                 )
                 messages.success(request, 'Trip created successfully (Draft).')
                 return redirect('trips_list')

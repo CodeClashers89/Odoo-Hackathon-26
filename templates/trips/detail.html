@@ -179,6 +179,18 @@
                     <th style="text-align: left; padding: 12px 0;">Planned Distance</th>
                     <td style="text-align: right;">{{ trip.planned_distance }} km</td>
                 </tr>
+                <tr>
+                    <th style="text-align: left; padding: 12px 0;">Fuel Type</th>
+                    <td style="text-align: right;">
+                        <span style="background: rgba(16,185,129,0.1); color: #10B981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                            {{ trip.fuel_type }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 12px 0;">Est. Fuel Cost</th>
+                    <td style="text-align: right;">₹{{ trip.estimated_fuel_cost|floatformat:2 }}</td>
+                </tr>
                 {% if trip.status == 'Completed' %}
                 <tr>
                     <th style="text-align: left; padding: 12px 0;">Actual Distance</th>

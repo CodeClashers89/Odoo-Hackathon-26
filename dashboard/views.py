@@ -47,24 +47,31 @@ def index(request):
     if total_active_fleet > 0:
         fleet_utilization = (active_vehicles / total_active_fleet) * 100
         
+    # Base trip queryset filtered by vehicle scope
     if is_driver:
-        recent_revenue_trips = Trip.objects.filter(driver__user=request.user).exclude(revenue__isnull=True).order_by('-created_at')[:15]
+        base_trips = Trip.objects.filter(driver__user=request.user)
     elif is_safety:
-        recent_revenue_trips = Trip.objects.filter(security_officer=request.user).exclude(revenue__isnull=True).order_by('-created_at')[:15]
+        base_trips = Trip.objects.filter(security_officer=request.user)
     else:
-        recent_revenue_trips = Trip.objects.exclude(revenue__isnull=True).order_by('-created_at')[:15]
-        
-    recent_revenue_trips = list(recent_revenue_trips)[::-1]
+        base_trips = Trip.objects.all()
+
+    # Apply vehicle_type filter to trips as well
+    if vehicle_type:
+        base_trips = base_trips.filter(vehicle__vehicle_type=vehicle_type)
+
+    recent_revenue_trips = list(
+        base_trips.exclude(revenue__isnull=True).order_by('-created_at')[:15]
+    )[::-1]
     revenue_labels = [f"Trip {t.id}" for t in recent_revenue_trips]
     revenue_data = [float(t.revenue) for t in recent_revenue_trips]
-    
-    if is_driver:
-        total_revenue_aggr = Trip.objects.filter(driver__user=request.user).aggregate(total=Sum('revenue'))
-    elif is_safety:
-        total_revenue_aggr = Trip.objects.filter(security_officer=request.user).aggregate(total=Sum('revenue'))
-    else:
-        total_revenue_aggr = Trip.objects.aggregate(total=Sum('revenue'))
+
+    total_revenue_aggr = base_trips.aggregate(total=Sum('revenue'))
     total_revenue = float(total_revenue_aggr['total'] or 0)
+
+    # Per vehicle-type revenue breakdown for the revenue section
+    truck_revenue = float(Trip.objects.filter(vehicle__vehicle_type='Truck').aggregate(total=Sum('revenue'))['total'] or 0)
+    van_revenue   = float(Trip.objects.filter(vehicle__vehicle_type='Van').aggregate(total=Sum('revenue'))['total'] or 0)
+    bike_revenue  = float(Trip.objects.filter(vehicle__vehicle_type='Bike').aggregate(total=Sum('revenue'))['total'] or 0)
         
     context = {
         'active_vehicles': active_vehicles,
@@ -77,6 +84,10 @@ def index(request):
         'revenue_labels': revenue_labels,
         'revenue_data': revenue_data,
         'total_revenue': total_revenue,
+        'truck_revenue': truck_revenue,
+        'van_revenue': van_revenue,
+        'bike_revenue': bike_revenue,
+        'selected_vehicle_type': vehicle_type or '',
     }
     return render(request, 'dashboard/index.html', context)
 

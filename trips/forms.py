@@ -18,20 +18,30 @@ class TripCreateForm(forms.ModelForm):
 
     class Meta:
         model = Trip
-        fields = ['source', 'destination', 'vehicle', 'driver', 'security_officer', 'cargo_weight', 'planned_distance', 'revenue']
+        fields = ['source', 'destination', 'vehicle', 'driver', 'security_officer',
+                  'cargo_weight', 'planned_distance', 'fuel_type', 'estimated_fuel_cost', 'revenue']
         widgets = {
             'source': forms.TextInput(attrs={'class': 'form-control'}),
             'destination': forms.TextInput(attrs={'class': 'form-control'}),
             'vehicle': forms.Select(attrs={'class': 'form-control'}),
             'driver': forms.Select(attrs={'class': 'form-control'}),
             'cargo_weight': forms.NumberInput(attrs={'class': 'form-control'}),
-            'planned_distance': forms.NumberInput(attrs={'class': 'form-control'}),
+            'planned_distance': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_planned_distance'}),
+            'fuel_type': forms.Select(attrs={'class': 'form-control', 'id': 'id_fuel_type'}),
+            'estimated_fuel_cost': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'id': 'id_estimated_fuel_cost',
+                'readonly': 'readonly',
+                'style': 'background: var(--surface-2, #f3f4f6); cursor: not-allowed;'
+            }),
             'revenue': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['security_officer'].queryset = User.objects.filter(profile__role='Safety Officer')
+        self.fields['estimated_fuel_cost'].required = False
+        self.fields['estimated_fuel_cost'].label = "Estimated Fuel Cost (₹) — Auto Calculated"
         
         # Only show available vehicles and drivers
         self.fields['vehicle'].queryset = Vehicle.objects.filter(status='Available')

@@ -8,7 +8,19 @@ from drivers.models import Driver
 from finance.models import FuelLog
 from decimal import Decimal
 
-def create_trip(source, destination, vehicle_id, driver_id, security_officer_id, cargo_weight, planned_distance, revenue, user):
+# Fuel prices per litre (INR) — update as needed
+FUEL_PRICES = {
+    'Diesel': Decimal('96.00'),
+    'Petrol': Decimal('104.00'),
+    'CNG':    Decimal('76.00'),
+}
+
+# Assumed km/L efficiency for cost estimation
+FUEL_EFFICIENCY_KML = Decimal('10.0')  # 10 km per litre
+
+def create_trip(source, destination, vehicle_id, driver_id, security_officer_id,
+                cargo_weight, planned_distance, revenue, user,
+                fuel_type='Diesel', estimated_fuel_cost=None):
     with transaction.atomic():
         vehicle = Vehicle.objects.select_for_update().get(id=vehicle_id)
         driver = Driver.objects.select_for_update().get(id=driver_id)
@@ -22,6 +34,17 @@ def create_trip(source, destination, vehicle_id, driver_id, security_officer_id,
             
         if driver.status != 'Available' or driver.is_license_expired():
             raise ValidationError("Driver is not Available or license is expired.")
+
+        # Auto-calculate estimated fuel cost if not provided
+        if estimated_fuel_cost is None or Decimal(str(estimated_fuel_cost)) == Decimal('0'):
+            price_per_litre = FUEL_PRICES.get(fuel_type, Decimal('96.00'))
+            estimated_fuel_cost = (Decimal(str(planned_distance)) / FUEL_EFFICIENCY_KML) * price_per_litre
+            
+        # Auto-calculate revenue if not provided (same logic as frontend)
+        if revenue is None or Decimal(str(revenue)) == Decimal('0'):
+            REVENUE_PER_KM = Decimal('50.00')
+            REVENUE_PER_KG = Decimal('10.00')
+            revenue = (Decimal(str(planned_distance)) * REVENUE_PER_KM) + (Decimal(str(cargo_weight)) * REVENUE_PER_KG)
             
         trip = Trip.objects.create(
             source=source,
@@ -32,6 +55,8 @@ def create_trip(source, destination, vehicle_id, driver_id, security_officer_id,
             cargo_weight=cargo_weight,
             planned_distance=planned_distance,
             revenue=revenue,
+            fuel_type=fuel_type,
+            estimated_fuel_cost=estimated_fuel_cost,
             created_by=user,
             status='Draft'
         )
@@ -87,9 +112,10 @@ def complete_trip(trip, final_odometer, fuel_consumed):
         trip.fuel_consumed = fuel_consumed
         trip.save()
         
-        # Automatically create Fuel Log
+        # Automatically create Fuel Log using actual fuel type price
         if fuel_consumed and fuel_consumed > 0:
-            cost = Decimal(fuel_consumed) * Decimal('90.00')  # Assuming 90 INR/L for automated entry
+            price_per_litre = FUEL_PRICES.get(trip.fuel_type, Decimal('96.00'))
+            cost = Decimal(str(fuel_consumed)) * price_per_litre
             FuelLog.objects.create(
                 vehicle=vehicle,
                 trip=trip,

@@ -7,7 +7,7 @@
 <div class="card">
     <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
         <div></div>
-        {% if user.profile.role in 'Safety Officer,Admin' %}
+        {% if user.profile.role == 'Admin' %}
         <a href="{% url 'driver_create' %}" class="btn btn-primary">Add Driver</a>
         {% endif %}
     </div>
@@ -38,7 +38,7 @@
                     </td>
                     <td>{{ driver.safety_score }}</td>
                     <td>
-                        {% if user.profile.role in 'Safety Officer,Admin' %}
+                        {% if user.profile.role == 'Admin' %}
                         <form method="post" action="{% url 'driver_update_status' driver.id %}" style="margin: 0;">
                             {% csrf_token %}
                             <select name="status" onchange="this.form.submit()" class="form-control" style="padding: 4px 8px; font-size: 12px; height: auto; border-radius: 12px; font-weight: 600; width: auto; cursor: pointer; outline: none; border: 1px solid transparent; text-align: center;
@@ -64,7 +64,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if user.profile.role in 'Safety Officer,Admin' %}
+                        {% if user.profile.role == 'Admin' %}
                         <a href="{% url 'driver_edit' driver.id %}" class="btn btn-ghost btn-sm">Edit</a>
                         {% endif %}
                     </td>

@@ -9,7 +9,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
         <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">FUEL LOGS</h3>
         <div style="display: flex; gap: 12px;">
-            {% if user.profile.role in 'Financial Analyst,Fleet Manager,Admin' %}
+            {% if user.profile.role in 'Financial Analyst,Fleet Manager,Admin,Safety Officer' %}
             <a href="{% url 'fuel_log_add' %}" class="btn" style="background-color: #D97706; color: white; border: none; border-radius: 6px; padding: 6px 16px;">+ Log Fuel</a>
             <a href="{% url 'expense_add' %}" class="btn" style="background-color: #D97706; color: white; border: none; border-radius: 6px; padding: 6px 16px;">+ Add Expense</a>
             {% endif %}

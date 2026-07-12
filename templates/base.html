@@ -43,8 +43,11 @@
                 <a href="{% url 'maintenance_list' %}" class="nav-item">Maintenance</a>
                 {% endif %}
 
-                {% if user.profile.role in 'Fleet Manager,Admin,Financial Analyst' %}
+                {% if user.profile.role in 'Fleet Manager,Admin,Financial Analyst,Safety Officer' %}
                 <a href="{% url 'finance_list' %}" class="nav-item">Fuel & Expenses</a>
+                {% endif %}
+
+                {% if user.profile.role in 'Fleet Manager,Admin,Financial Analyst' %}
                 <a href="{% url 'reports' %}" class="nav-item">Reports</a>
                 {% endif %}
 

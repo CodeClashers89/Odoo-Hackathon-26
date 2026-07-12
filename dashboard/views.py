@@ -12,10 +12,13 @@ def index(request):
     region = request.GET.get('region')
     
     is_driver = hasattr(request.user, 'profile') and request.user.profile.role == 'Driver'
+    is_safety = hasattr(request.user, 'profile') and request.user.profile.role == 'Safety Officer'
     
     vehicles = Vehicle.objects.all()
     if is_driver:
         vehicles = vehicles.filter(trips__driver__user=request.user).distinct()
+    elif is_safety:
+        vehicles = vehicles.filter(trips__security_officer=request.user).distinct()
         
     if vehicle_type:
         vehicles = vehicles.filter(vehicle_type=vehicle_type)
@@ -30,6 +33,10 @@ def index(request):
         active_trips = Trip.objects.filter(driver__user=request.user, status='Dispatched').count()
         pending_trips = Trip.objects.filter(driver__user=request.user, status='Draft').count()
         drivers_on_duty = 1 if Driver.objects.filter(user=request.user, status='On Trip').exists() else 0
+    elif is_safety:
+        active_trips = Trip.objects.filter(security_officer=request.user, status='Dispatched').count()
+        pending_trips = Trip.objects.filter(security_officer=request.user, status='Draft').count()
+        drivers_on_duty = Driver.objects.filter(trips__security_officer=request.user, status='On Trip').distinct().count()
     else:
         active_trips = Trip.objects.filter(status='Dispatched').count()
         pending_trips = Trip.objects.filter(status='Draft').count()
@@ -42,6 +49,8 @@ def index(request):
         
     if is_driver:
         recent_revenue_trips = Trip.objects.filter(driver__user=request.user).exclude(revenue__isnull=True).order_by('-created_at')[:15]
+    elif is_safety:
+        recent_revenue_trips = Trip.objects.filter(security_officer=request.user).exclude(revenue__isnull=True).order_by('-created_at')[:15]
     else:
         recent_revenue_trips = Trip.objects.exclude(revenue__isnull=True).order_by('-created_at')[:15]
         
@@ -51,6 +60,8 @@ def index(request):
     
     if is_driver:
         total_revenue_aggr = Trip.objects.filter(driver__user=request.user).aggregate(total=Sum('revenue'))
+    elif is_safety:
+        total_revenue_aggr = Trip.objects.filter(security_officer=request.user).aggregate(total=Sum('revenue'))
     else:
         total_revenue_aggr = Trip.objects.aggregate(total=Sum('revenue'))
     total_revenue = float(total_revenue_aggr['total'] or 0)

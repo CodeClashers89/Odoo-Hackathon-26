@@ -10,7 +10,7 @@ def driver_list(request):
     drivers = Driver.objects.all()
     return render(request, 'drivers/list.html', {'drivers': drivers})
 
-@role_required('Safety Officer', 'Admin')
+@role_required('Admin')
 def driver_create(request):
     if request.method == 'POST':
         form = DriverForm(request.POST)
@@ -43,7 +43,7 @@ def driver_create(request):
         form = DriverForm()
     return render(request, 'drivers/form.html', {'form': form, 'action': 'Create'})
 
-@role_required('Safety Officer', 'Admin')
+@role_required('Admin')
 def driver_edit(request, driver_id):
     driver = get_object_or_404(Driver, id=driver_id)
     if request.method == 'POST':
@@ -85,7 +85,7 @@ def driver_edit(request, driver_id):
         form = DriverForm(instance=driver)
     return render(request, 'drivers/form.html', {'form': form, 'action': 'Edit'})
 
-@role_required('Safety Officer', 'Admin')
+@role_required('Admin')
 def driver_update_status(request, driver_id):
     if request.method == 'POST':
         driver = get_object_or_404(Driver, id=driver_id)

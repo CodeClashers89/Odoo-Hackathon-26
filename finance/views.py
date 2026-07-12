@@ -5,7 +5,7 @@ from django.db.models import Sum
 from .models import FuelLog, Expense
 from .forms import FuelLogForm, ExpenseForm
 
-@role_required('Financial Analyst', 'Fleet Manager', 'Admin')
+@role_required('Financial Analyst', 'Fleet Manager', 'Safety Officer', 'Admin')
 def finance_list(request):
     # Fuel Logs
     fuel_logs = FuelLog.objects.select_related('vehicle').all()
@@ -64,7 +64,7 @@ def finance_list(request):
     }
     return render(request, 'finance/list.html', context)
 
-@role_required('Financial Analyst', 'Fleet Manager', 'Admin')
+@role_required('Financial Analyst', 'Fleet Manager', 'Safety Officer', 'Admin')
 def fuel_log_add(request):
     if request.method == 'POST':
         form = FuelLogForm(request.POST)
@@ -76,7 +76,7 @@ def fuel_log_add(request):
         form = FuelLogForm()
     return render(request, 'finance/form.html', {'form': form, 'action': 'Add Fuel Log'})
 
-@role_required('Financial Analyst', 'Fleet Manager', 'Admin')
+@role_required('Financial Analyst', 'Fleet Manager', 'Safety Officer', 'Admin')
 def expense_add(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST)

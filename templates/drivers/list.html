@@ -70,6 +70,7 @@
                         {% endif %}
                     </td>
                     <td>
+                        <a href="{% url 'driver_profile' driver.id %}" class="btn btn-ghost btn-sm" style="color: var(--primary);">Profile</a>
                         {% if user.profile.role == 'Admin' %}
                         <a href="{% url 'driver_edit' driver.id %}" class="btn btn-ghost btn-sm">Edit</a>
                         {% endif %}

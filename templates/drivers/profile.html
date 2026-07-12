@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Driver Profile - TransitOps{% endblock %}
+{% block page_title %}Driver Profile{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 24px;">
+    <!-- Profile Header Card -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background-color: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">
+                    {{ driver.name|slice:":1" }}
+                </div>
+                <div>
+                    <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: var(--text);">{{ driver.name }}</h2>
+                    <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                        <span class="badge 
+                            {% if driver.status == 'Available' %}badge-success
+                            {% elif driver.status == 'On Trip' %}badge-info
+                            {% elif driver.status == 'Off Duty' %}badge-warning
+                            {% else %}badge-danger{% endif %}">
+                            {{ driver.status }}
+                        </span>
+                        <span class="badge 
+                            {% if driver.safety_score >= 85 %}badge-success
+                            {% elif driver.safety_score >= 70 %}badge-warning
+                            {% else %}badge-danger{% endif %}">
+                            Safety Score: {{ driver.safety_score }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <a href="{% url 'drivers_list' %}" class="btn btn-ghost">Back to List</a>
+                {% if user.profile.role == 'Admin' %}
+                <a href="{% url 'driver_edit' driver.id %}" class="btn btn-primary">Edit Profile</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats & General Info Grid -->
+    <div class="grid grid-cols-3">
+        <!-- Stats Card 1: Total Trips -->
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Total Trips Assigned</div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--text);">{{ stats.total_trips }}</div>
+        </div>
+        <!-- Stats Card 2: Completed Trips -->
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Completed Trips</div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--success);">{{ stats.completed_trips_count }}</div>
+        </div>
+        <!-- Stats Card 3: Distance Covered -->
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Distance Covered</div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--info);">{{ stats.total_distance|floatformat:1 }} km</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3">
+        <!-- Revenue Card (Width 1) -->
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
+            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Revenue Generated</div>
+            <div style="font-size: 32px; font-weight: 700; color: var(--primary);">₹{{ stats.total_revenue|floatformat:2 }}</div>
+        </div>
+        
+        <!-- General Info (Width 2) -->
+        <div class="card" style="grid-column: span 2; margin-bottom: 0;">
+            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">Driver Information</h3>
+            <div class="grid grid-cols-2" style="gap: 16px 24px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">License Number</div>
+                    <div style="font-weight: 500;">{{ driver.license_number }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">License Category</div>
+                    <div style="font-weight: 500;">{{ driver.license_category }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">License Expiry</div>
+                    <div style="font-weight: 500;">
+                        {% if driver.is_license_expired %}
+                            <span class="badge badge-danger">Expired: {{ driver.license_expiry_date }}</span>
+                        {% else %}
+                            {{ driver.license_expiry_date }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">Contact Phone</div>
+                    <div style="font-weight: 500;">{{ driver.contact_number }}</div>
+                </div>
+                {% if driver.user %}
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">Username</div>
+                    <div style="font-weight: 500;">{{ driver.user.username }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">Email Address</div>
+                    <div style="font-weight: 500;">{{ driver.user.email|default:"—" }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip History Card -->
+    <div class="card">
+        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">Trip History</h3>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Trip ID</th>
+                        <th>Route</th>
+                        <th>Vehicle</th>
+                        <th>Distance</th>
+                        <th>Revenue</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trip in trips %}
+                    <tr>
+                        <td><strong>#{{ trip.id }}</strong></td>
+                        <td>{{ trip.source }} to {{ trip.destination }}</td>
+                        <td>
+                            <a href="{% url 'vehicle_detail' trip.vehicle.id %}" style="font-weight: 500;">
+                                {{ trip.vehicle.registration_number }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if trip.actual_distance %}
+                                {{ trip.actual_distance }} km
+                            {% else %}
+                                {{ trip.planned_distance }} km (est.)
+                            {% endif %}
+                        </td>
+                        <td>₹{{ trip.revenue }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if trip.status == 'Completed' %}badge-success
+                                {% elif trip.status == 'Dispatched' %}badge-info
+                                {% elif trip.status == 'Draft' %}badge-warning
+                                {% else %}badge-danger{% endif %}">
+                                {{ trip.status }}
+                            </span>
+                        </td>
+                        <td>{{ trip.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No trips recorded for this driver.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

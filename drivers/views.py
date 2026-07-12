@@ -111,3 +111,32 @@ def send_expiry_notifications(request):
             messages.error(request, f"Error calling notification script: {str(e)}")
     return redirect('drivers_list')
 
+
+@role_required('Fleet Manager', 'Safety Officer', 'Admin')
+def driver_profile(request, driver_id):
+    driver = get_object_or_404(Driver, id=driver_id)
+    trips = driver.trips.all().order_by('-created_at')
+    
+    # Calculate stats
+    total_trips = trips.count()
+    completed_trips = trips.filter(status='Completed')
+    completed_trips_count = completed_trips.count()
+    
+    total_distance = sum(
+        t.actual_distance if t.actual_distance is not None else t.planned_distance 
+        for t in completed_trips
+    )
+    total_revenue = sum(t.revenue for t in completed_trips)
+    
+    context = {
+        'driver': driver,
+        'trips': trips,
+        'stats': {
+            'total_trips': total_trips,
+            'completed_trips_count': completed_trips_count,
+            'total_distance': total_distance,
+            'total_revenue': total_revenue,
+        }
+    }
+    return render(request, 'drivers/profile.html', context)
+

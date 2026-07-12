@@ -7,4 +7,5 @@ urlpatterns = [
     path('send-notifications/', views.send_expiry_notifications, name='driver_send_expiry_notifications'),
     path('<int:driver_id>/edit/', views.driver_edit, name='driver_edit'),
     path('<int:driver_id>/update_status/', views.driver_update_status, name='driver_update_status'),
+    path('<int:driver_id>/', views.driver_profile, name='driver_profile'),
 ]

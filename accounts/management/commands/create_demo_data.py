@@ -29,6 +29,7 @@ class Command(BaseCommand):
             ('manager', 'managerpass', 'Fleet Manager'),
             ('driver', 'driverpass', 'Driver'),
             ('safety', 'safetypass', 'Safety Officer'),
+            ('safety2', 'safetypass', 'Safety Officer'),
             ('finance', 'financepass', 'Financial Analyst'),
         ]
         
@@ -41,6 +42,8 @@ class Command(BaseCommand):
                 profile.role = role
                 profile.save()
             users_map[username] = user
+
+        safety_officers = list(User.objects.filter(profile__role='Safety Officer'))
 
         # Vehicles
         self.stdout.write("Creating Vehicles...")
@@ -124,7 +127,7 @@ class Command(BaseCommand):
                 destination=dest,
                 vehicle=v,
                 driver=d,
-                security_officer=users_map['safety'],
+                security_officer=random.choice(safety_officers),
                 cargo_weight=Decimal(str(random.uniform(500, float(v.max_load_capacity)))),
                 planned_distance=Decimal(str(random.uniform(50, 1000))),
                 revenue=Decimal(str(random.uniform(5000, 50000))),

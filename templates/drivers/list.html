@@ -8,7 +8,13 @@
     <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
         <div></div>
         {% if user.profile.role == 'Admin' %}
-        <a href="{% url 'driver_create' %}" class="btn btn-primary">Add Driver</a>
+        <div style="display: flex; gap: 12px;">
+            <form method="post" action="{% url 'driver_send_expiry_notifications' %}" onsubmit="return confirm('Are you sure you want to send email alerts to all drivers whose licenses are expiring within 30 days?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost" style="color: var(--primary); border-color: var(--primary);">Notify Expiring Licenses</button>
+            </form>
+            <a href="{% url 'driver_create' %}" class="btn btn-primary">Add Driver</a>
+        </div>
         {% endif %}
     </div>
 

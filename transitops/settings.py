@@ -133,3 +133,13 @@ STATICFILES_DIRS = [
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Email settings
+import os
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '9f341e001@smtp-brevo.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'xsmtpsib-d79f2f8af8cad6347a6d871ecb03b9e8702b3f2311ea23c1411f50af564de8db-VTsJiorz5mMJ7cYF')
+DEFAULT_FROM_EMAIL = 'kamanipoojan@gmail.com'

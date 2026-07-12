@@ -96,3 +96,18 @@ def driver_update_status(request, driver_id):
             messages.success(request, f'Status for {driver.name} updated to {new_status}.')
     return redirect('drivers_list')
 
+from django.core.management import call_command
+from io import StringIO
+
+@role_required('Admin')
+def send_expiry_notifications(request):
+    if request.method == 'POST':
+        out = StringIO()
+        try:
+            call_command('send_notifications', stdout=out)
+            output = out.getvalue().replace('\n', '<br>')
+            messages.success(request, f"<strong>Execution Log:</strong><br>{output}")
+        except Exception as e:
+            messages.error(request, f"Error calling notification script: {str(e)}")
+    return redirect('drivers_list')
+

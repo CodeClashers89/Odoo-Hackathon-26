@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- FUEL LOGS SECTION -->
-<div style="margin-bottom: 32px;">
+<div class="card" style="margin-bottom: 32px;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
         <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">FUEL LOGS</h3>
         <div style="display: flex; gap: 12px;">
@@ -16,7 +16,7 @@
         </div>
     </div>
     
-    <div class="table-container" style="background: transparent; box-shadow: none;">
+    <div class="table-container">
         <table class="table" style="width: 100%; text-align: left;">
             <thead>
                 <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
@@ -45,12 +45,12 @@
 </div>
 
 <!-- OTHER EXPENSES SECTION -->
-<div style="margin-bottom: 32px;">
+<div class="card" style="margin-bottom: 32px;">
     <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
         <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">OTHER EXPENSES (TOLL / MISC)</h3>
     </div>
     
-    <div class="table-container" style="background: transparent; box-shadow: none;">
+    <div class="table-container">
         <table class="table" style="width: 100%; text-align: left;">
             <thead>
                 <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
@@ -91,12 +91,12 @@
 </div>
 
 <!-- MAINTENANCE LOGS SECTION -->
-<div style="margin-bottom: 32px;">
+<div class="card" style="margin-bottom: 32px;">
     <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
         <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">MAINTENANCE LOGS</h3>
     </div>
     
-    <div class="table-container" style="background: transparent; box-shadow: none;">
+    <div class="table-container">
         <table class="table" style="width: 100%; text-align: left;">
             <thead>
                 <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
@@ -133,12 +133,12 @@
 </div>
 
 <!-- FOOTER ROW -->
-<div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-color); padding-top: 16px; margin-top: 32px;">
+<div class="card" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(79,70,229,0.06), rgba(16,185,129,0.06)); border: 1px solid var(--border-color, #e5e7eb);">
     <div style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">
         TOTAL OPERATIONAL COST (AUTO) = FUEL + MAINT + TOLL + OTHER
     </div>
-    <div style="font-size: 20px; font-weight: 700; color: #D97706;">
-        {{ grand_total|floatformat:0 }}
+    <div style="font-size: 24px; font-weight: 700; color: #D97706;">
+        ₹{{ grand_total|floatformat:0 }}
     </div>
 </div>
 

@@ -102,27 +102,19 @@
                 </div>
             </div>
 
-            <!-- Fuel Type & Estimated Cost Section -->
+            <!-- Fuel Type Section -->
             <div style="background: linear-gradient(135deg, rgba(79,70,229,0.06), rgba(16,185,129,0.06)); border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; padding: 18px 20px; margin: 4px 0 8px 0;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
                     <span style="font-size: 18px;">⛽</span>
                     <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted);">Fuel Details</span>
                 </div>
-                <div class="grid grid-cols-2" style="gap: 16px;">
+                <div class="grid grid-cols-1" style="gap: 16px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label" for="{{ form.fuel_type.id_for_label }}">Fuel Type</label>
                         {{ form.fuel_type }}
                         {{ form.fuel_type.errors }}
                         <small id="fuel-price-hint" style="display: block; margin-top: 5px; color: var(--text-muted); font-size: 12px;">
                             ₹96/L &bull; Assumed 10 km/L efficiency
-                        </small>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="{{ form.estimated_fuel_cost.id_for_label }}">{{ form.estimated_fuel_cost.label }}</label>
-                        {{ form.estimated_fuel_cost }}
-                        {{ form.estimated_fuel_cost.errors }}
-                        <small id="fuel-liters-hint" style="display: block; margin-top: 5px; color: #10B981; font-size: 12px; font-weight: 600;">
-                            — litres needed
                         </small>
                     </div>
                 </div>
@@ -304,10 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fuelTypeEl     = document.getElementById('id_fuel_type');
     const distanceEl     = document.getElementById('id_planned_distance');
     const weightEl       = document.getElementById('id_cargo_weight');
-    const costEl         = document.getElementById('id_estimated_fuel_cost');
     const revenueEl      = document.getElementById('id_revenue');
     const priceHintEl    = document.getElementById('fuel-price-hint');
-    const litersHintEl   = document.getElementById('fuel-liters-hint');
 
     // Make revenue field readonly since it's auto-calculated
     if (revenueEl) {
@@ -321,16 +311,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const distance  = parseFloat(distanceEl ? distanceEl.value : 0) || 0;
         const weight    = parseFloat(weightEl ? weightEl.value : 0) || 0;
         
-        // 1. Calculate Fuel Cost
+        // 1. Update Fuel Price Hint
         const price     = FUEL_PRICES[fuelType] || 96;
-        const liters    = distance / FUEL_EFFICIENCY;
-        const totalCost = liters * price;
-
-        if (costEl)       costEl.value = totalCost.toFixed(2);
         if (priceHintEl)  priceHintEl.innerHTML = `₹${price}/L &bull; Assumed ${FUEL_EFFICIENCY} km/L efficiency`;
-        if (litersHintEl) litersHintEl.textContent = distance > 0
-            ? `≈ ${liters.toFixed(1)} litres needed`
-            : '— litres needed';
             
         // 2. Calculate Expected Revenue: e.g. ₹50 per km + ₹10 per kg of cargo
         const REVENUE_PER_KM = 50;

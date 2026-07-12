@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Log Maintenance - TransitOps{% endblock %}
+{% block page_title %}Log Maintenance{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px;">
+    <div class="alert alert-warning" style="margin-bottom: 24px;">
+        Submitting this form will automatically set the selected vehicle's status to <strong>In Shop</strong>.
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.vehicle.id_for_label }}">Vehicle</label>
+            {{ form.vehicle }}
+            {{ form.vehicle.errors }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.maintenance_type.id_for_label }}">Maintenance Type (e.g., Oil Change, Tire Replacement)</label>
+            {{ form.maintenance_type }}
+            {{ form.maintenance_type.errors }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+            {{ form.description.errors }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.cost.id_for_label }}">Cost ($)</label>
+            {{ form.cost }}
+            {{ form.cost.errors }}
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'maintenance_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Record</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

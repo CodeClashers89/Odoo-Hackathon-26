@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicles - TransitOps{% endblock %}
+{% block page_title %}Vehicles{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        <form method="get" style="display: flex; gap: 16px;">
+            <select name="status" class="form-control" onchange="this.form.submit()" style="width: auto;">
+                <option value="">All Statuses</option>
+                <option value="Available" {% if status_filter == 'Available' %}selected{% endif %}>Available</option>
+                <option value="On Trip" {% if status_filter == 'On Trip' %}selected{% endif %}>On Trip</option>
+                <option value="In Shop" {% if status_filter == 'In Shop' %}selected{% endif %}>In Shop</option>
+                <option value="Retired" {% if status_filter == 'Retired' %}selected{% endif %}>Retired</option>
+            </select>
+        </form>
+        {% if user.profile.role in 'Fleet Manager,Admin' %}
+        <a href="{% url 'vehicle_create' %}" class="btn btn-primary">Add Vehicle</a>
+        {% endif %}
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Registration</th>
+                    <th>Model</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Odometer (km)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td style="font-weight: 500;">{{ vehicle.registration_number }}</td>
+                    <td>{{ vehicle.name_model }}</td>
+                    <td>{{ vehicle.vehicle_type }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if vehicle.status == 'Available' %}badge-success
+                            {% elif vehicle.status == 'On Trip' %}badge-info
+                            {% elif vehicle.status == 'In Shop' %}badge-warning
+                            {% else %}badge-danger{% endif %}">
+                            {{ vehicle.status }}
+                        </span>
+                    </td>
+                    <td>{{ vehicle.odometer }}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm">View</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No vehicles found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

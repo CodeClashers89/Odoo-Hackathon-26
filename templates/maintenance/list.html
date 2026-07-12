@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Maintenance - TransitOps{% endblock %}
+{% block page_title %}Maintenance Logs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        <div></div>
+        {% if user.profile.role in 'Fleet Manager,Admin' %}
+        <a href="{% url 'maintenance_create' %}" class="btn btn-primary">Log Maintenance</a>
+        {% endif %}
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Type</th>
+                    <th>Cost</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.started_at|date:"M d, Y" }}</td>
+                    <td style="font-weight: 500;">{{ log.vehicle.registration_number }}</td>
+                    <td>{{ log.maintenance_type }}</td>
+                    <td>${{ log.cost }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if log.status == 'Active' %}badge-warning
+                            {% else %}badge-success{% endif %}">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if log.status == 'Active' %}
+                            <form method="post" action="{% url 'maintenance_close' log.id %}" onsubmit="return confirm('Close this maintenance log? Vehicle will become Available again.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm" style="background-color: var(--success); color: white;">Close Log</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No maintenance logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

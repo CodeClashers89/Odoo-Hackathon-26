@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Drivers - TransitOps{% endblock %}
+{% block page_title %}Drivers{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        <div></div>
+        {% if user.profile.role in 'Safety Officer,Admin' %}
+        <a href="{% url 'driver_create' %}" class="btn btn-primary">Add Driver</a>
+        {% endif %}
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>License</th>
+                    <th>Expiry</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for driver in drivers %}
+                <tr>
+                    <td style="font-weight: 500;">{{ driver.name }}</td>
+                    <td>{{ driver.license_number }} ({{ driver.license_category }})</td>
+                    <td>
+                        {% if driver.is_license_expired %}
+                            <span class="badge badge-danger">Expired: {{ driver.license_expiry_date }}</span>
+                        {% else %}
+                            {{ driver.license_expiry_date }}
+                        {% endif %}
+                    </td>
+                    <td>{{ driver.safety_score }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if driver.status == 'Available' %}badge-success
+                            {% elif driver.status == 'On Trip' %}badge-info
+                            {% elif driver.status == 'Off Duty' %}badge-warning
+                            {% else %}badge-danger{% endif %}">
+                            {{ driver.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm">View</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No drivers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

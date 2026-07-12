@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TransitOps{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px; display: flex; gap: 16px;">
+    <form method="get" style="display: flex; gap: 16px;">
+        <select name="vehicle_type" class="form-control" onchange="this.form.submit()" style="width: auto;">
+            <option value="">All Vehicle Types</option>
+            <option value="Truck" {% if request.GET.vehicle_type == 'Truck' %}selected{% endif %}>Truck</option>
+            <option value="Van" {% if request.GET.vehicle_type == 'Van' %}selected{% endif %}>Van</option>
+            <option value="Bike" {% if request.GET.vehicle_type == 'Bike' %}selected{% endif %}>Bike</option>
+        </select>
+        <button type="submit" class="btn btn-primary" style="display: none;">Filter</button>
+    </form>
+</div>
+
+<div class="grid grid-cols-4" style="margin-bottom: 24px;">
+    <div class="card kpi-card">
+        <h3>Fleet Utilization</h3>
+        <div class="value" style="color: var(--primary);">{{ fleet_utilization }}%</div>
+    </div>
+    <div class="card kpi-card">
+        <h3>Active Vehicles</h3>
+        <div class="value text-primary">{{ active_vehicles }}</div>
+    </div>
+    <div class="card kpi-card">
+        <h3>Available Vehicles</h3>
+        <div class="value text-success">{{ available_vehicles }}</div>
+    </div>
+    <div class="card kpi-card">
+        <h3>In Maintenance</h3>
+        <div class="value text-warning">{{ maintenance_vehicles }}</div>
+    </div>
+</div>
+
+<div class="grid grid-cols-3">
+    <div class="card kpi-card">
+        <h3>Active Trips</h3>
+        <div class="value text-info">{{ active_trips }}</div>
+    </div>
+    <div class="card kpi-card">
+        <h3>Pending Trips (Draft)</h3>
+        <div class="value text-muted">{{ pending_trips }}</div>
+    </div>
+    <div class="card kpi-card">
+        <h3>Drivers On Duty</h3>
+        <div class="value" style="color: var(--info);">{{ drivers_on_duty }}</div>
+    </div>
+</div>
+{% endblock %}

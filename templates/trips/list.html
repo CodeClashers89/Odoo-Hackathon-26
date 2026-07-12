@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Trips - TransitOps{% endblock %}
+{% block page_title %}Trips{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        <div></div>
+        {% if user.profile.role in 'Fleet Manager,Driver,Admin' %}
+        <a href="{% url 'trip_create' %}" class="btn btn-primary">Create Trip</a>
+        {% endif %}
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Route</th>
+                    <th>Vehicle</th>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip in trips %}
+                <tr>
+                    <td style="font-weight: 500;">#{{ trip.id }}</td>
+                    <td>{{ trip.source }} &rarr; {{ trip.destination }}</td>
+                    <td>{{ trip.vehicle.registration_number }}</td>
+                    <td>{{ trip.driver.name }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if trip.status == 'Completed' %}badge-success
+                            {% elif trip.status == 'Dispatched' %}badge-info
+                            {% elif trip.status == 'Draft' %}badge-warning
+                            {% else %}badge-danger{% endif %}">
+                            {{ trip.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            {% if trip.status == 'Draft' %}
+                                <form method="post" action="{% url 'trip_dispatch' trip.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Dispatch</button>
+                                </form>
+                            {% elif trip.status == 'Dispatched' %}
+                                <a href="{% url 'trip_complete' trip.id %}" class="btn btn-success btn-sm" style="background-color: var(--success); color: white;">Complete</a>
+                            {% endif %}
+
+                            {% if trip.status in 'Draft,Dispatched' %}
+                                <form method="post" action="{% url 'trip_cancel' trip.id %}" onsubmit="return confirm('Are you sure you want to cancel this trip?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--danger);">Cancel</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No trips found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

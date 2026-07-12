@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Trip - TransitOps{% endblock %}
+{% block page_title %}Complete Trip #{{ trip.id }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px;">
+    <div style="margin-bottom: 24px; padding: 16px; background: var(--bg); border-radius: 6px;">
+        <strong>Vehicle:</strong> {{ trip.vehicle.registration_number }}<br>
+        <strong>Current Odometer:</strong> {{ trip.vehicle.odometer }} km
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.final_odometer.id_for_label }}">Final Odometer Reading (km)</label>
+            {{ form.final_odometer }}
+            {{ form.final_odometer.errors }}
+            <p class="help-text">Must be greater than or equal to current odometer.</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.fuel_consumed.id_for_label }}">Fuel Consumed (Liters)</label>
+            {{ form.fuel_consumed }}
+            {{ form.fuel_consumed.errors }}
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'trips_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="background-color: var(--success);">Complete Trip</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

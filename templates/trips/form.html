@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Trip - TransitOps{% endblock %}
+{% block page_title %}Create Trip{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.source.id_for_label }}">Source</label>
+                {{ form.source }}
+                {{ form.source.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.destination.id_for_label }}">Destination</label>
+                {{ form.destination }}
+                {{ form.destination.errors }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.vehicle.id_for_label }}">Vehicle (Available only)</label>
+                {{ form.vehicle }}
+                {{ form.vehicle.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.driver.id_for_label }}">Driver (Available & Valid License)</label>
+                {{ form.driver }}
+                {{ form.driver.errors }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.cargo_weight.id_for_label }}">Cargo Weight (kg)</label>
+                {{ form.cargo_weight }}
+                {{ form.cargo_weight.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.planned_distance.id_for_label }}">Planned Distance (km)</label>
+                {{ form.planned_distance }}
+                {{ form.planned_distance.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.revenue.id_for_label }}">Trip Revenue (Optional)</label>
+            {{ form.revenue }}
+            {{ form.revenue.errors }}
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'trips_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Trip</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

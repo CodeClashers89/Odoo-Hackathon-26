@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TransitOps{% endblock %}</title>
+    
+    <!-- Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="layout">
+        {% if user.is_authenticated %}
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>TransitOps</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard' %}" class="nav-item">Dashboard</a>
+                
+                {% if user.profile.role in 'Fleet Manager,Admin,Driver,Safety Officer' %}
+                <a href="{% url 'trips_list' %}" class="nav-item">Trips</a>
+                {% endif %}
+                
+                {% if user.profile.role in 'Fleet Manager,Admin,Safety Officer' %}
+                <a href="{% url 'vehicles_list' %}" class="nav-item">Vehicles</a>
+                <a href="{% url 'drivers_list' %}" class="nav-item">Drivers</a>
+                {% endif %}
+
+                {% if user.profile.role in 'Fleet Manager,Admin' %}
+                <a href="{% url 'maintenance_list' %}" class="nav-item">Maintenance</a>
+                {% endif %}
+
+                {% if user.profile.role in 'Fleet Manager,Admin,Financial Analyst' %}
+                <a href="{% url 'finance_list' %}" class="nav-item">Finance</a>
+                <a href="{% url 'reports' %}" class="nav-item">Reports</a>
+                {% endif %}
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role badge badge-primary">{{ user.profile.role }}</div>
+                </div>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost btn-sm w-full mt-2">Log out</button>
+                </form>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% if user.is_authenticated %}
+            <header class="topbar">
+                <div class="page-title">
+                    <h1>{% block page_title %}Overview{% endblock %}</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button id="theme-toggle" class="btn btn-ghost">Toggle Theme</button>
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="content-container">
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                html.setAttribute('data-theme', newTheme);
+                document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
+            });
+
+            // Load theme from cookie
+            const getCookie = (name) => {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            };
+            const savedTheme = getCookie('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Vehicle - TransitOps{% endblock %}
+{% block page_title %}{{ action }} Vehicle{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.registration_number.id_for_label }}">Registration Number</label>
+                {{ form.registration_number }}
+                {{ form.registration_number.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.name_model.id_for_label }}">Make & Model</label>
+                {{ form.name_model }}
+                {{ form.name_model.errors }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.vehicle_type.id_for_label }}">Vehicle Type</label>
+                {{ form.vehicle_type }}
+                {{ form.vehicle_type.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.max_load_capacity.id_for_label }}">Max Load (kg)</label>
+                {{ form.max_load_capacity }}
+                {{ form.max_load_capacity.errors }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.odometer.id_for_label }}">Initial Odometer (km)</label>
+                {{ form.odometer }}
+                {{ form.odometer.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.acquisition_cost.id_for_label }}">Acquisition Cost</label>
+                {{ form.acquisition_cost }}
+                {{ form.acquisition_cost.errors }}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.region.id_for_label }}">Region</label>
+            {{ form.region }}
+            {{ form.region.errors }}
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'vehicles_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Vehicle</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

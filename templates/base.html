@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TransitOps{% endblock %}</title>
     
-    <!-- Fonts: Inter -->
+    <!-- Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,6 +20,31 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <!-- On-Theme Transit Highway Loader -->
+    <div id="app-loader" class="app-loader-overlay">
+        <div class="loader-content">
+            <div class="truck-loader-wrapper">
+                <svg class="truck-svg" viewBox="0 0 100 50" width="120" height="60" style="fill: var(--primary);">
+                    <!-- Cargo compartment -->
+                    <path d="M10,12 L65,12 L65,38 L10,38 Z" fill="var(--primary)" opacity="0.3"/>
+                    <path d="M10,12 L65,12 L65,38 L10,38 Z" fill="none" stroke="var(--primary)" stroke-width="2.5"/>
+                    <!-- Cabin -->
+                    <path d="M65,18 L80,18 L88,28 L88,38 L65,38 Z" fill="var(--primary)" opacity="0.5"/>
+                    <path d="M65,18 L80,18 L88,28 L88,38 L65,38 Z" fill="none" stroke="var(--primary)" stroke-width="2.5"/>
+                    <!-- Windshield -->
+                    <path d="M78,20 L84,28 L78,28 Z" fill="var(--bg)"/>
+                    <!-- Wheels -->
+                    <circle cx="24" cy="38" r="8" fill="var(--text)" stroke="var(--surface)" stroke-width="2"/>
+                    <circle cx="24" cy="38" r="3" fill="var(--bg)"/>
+                    <circle cx="72" cy="38" r="8" fill="var(--text)" stroke="var(--surface)" stroke-width="2"/>
+                    <circle cx="72" cy="38" r="3" fill="var(--bg)"/>
+                </svg>
+                <div class="loader-road"></div>
+            </div>
+            <p class="loader-text">TransitOps Dispatching...</p>
+        </div>
+    </div>
+
     <div class="layout">
         {% if user.is_authenticated %}
         <!-- Sidebar Navigation -->
@@ -120,6 +145,14 @@
                 document.documentElement.setAttribute('data-theme', savedTheme);
             }
         }
+
+        // Fade out on-theme loader
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.classList.add('fade-out');
+            }
+        });
     </script>
     
     {% block extra_js %}{% endblock %}

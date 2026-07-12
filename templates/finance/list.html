@@ -1,8 +1,145 @@
 {% extends 'base.html' %}
-{% block title %}Finance - TransitOps{% endblock %}
-{% block page_title %}Finance (WIP){% endblock %}
+{% block title %}Fuel & Expenses - TransitOps{% endblock %}
+{% block page_title %}Fuel & Expenses{% endblock %}
+
 {% block content %}
-<div class="card">
-    <p>Finance module view placeholder.</p>
+
+<!-- FUEL LOGS SECTION -->
+<div style="margin-bottom: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
+        <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">FUEL LOGS</h3>
+        <div style="display: flex; gap: 12px;">
+            {% if user.profile.role in 'Financial Analyst,Fleet Manager,Admin' %}
+            <a href="{% url 'fuel_log_add' %}" class="btn" style="background-color: #D97706; color: white; border: none; border-radius: 6px; padding: 6px 16px;">+ Log Fuel</a>
+            <a href="{% url 'expense_add' %}" class="btn" style="background-color: #D97706; color: white; border: none; border-radius: 6px; padding: 6px 16px;">+ Add Expense</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="table-container" style="background: transparent; box-shadow: none;">
+        <table class="table" style="width: 100%; text-align: left;">
+            <thead>
+                <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
+                    <th style="padding: 12px 0;">VEHICLE</th>
+                    <th style="padding: 12px 0;">DATE</th>
+                    <th style="padding: 12px 0;">LITERS</th>
+                    <th style="padding: 12px 0;">FUEL COST</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in fuel_logs %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px 0; font-weight: 500;">{{ log.vehicle.registration_number }}</td>
+                    <td style="padding: 16px 0;">{{ log.date|date:"d M Y" }}</td>
+                    <td style="padding: 16px 0;">{{ log.liters }} L</td>
+                    <td style="padding: 16px 0;">{{ log.cost|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">No fuel logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- OTHER EXPENSES SECTION -->
+<div style="margin-bottom: 32px;">
+    <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
+        <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">OTHER EXPENSES (TOLL / MISC)</h3>
+    </div>
+    
+    <div class="table-container" style="background: transparent; box-shadow: none;">
+        <table class="table" style="width: 100%; text-align: left;">
+            <thead>
+                <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
+                    <th style="padding: 12px 0;">TRIP</th>
+                    <th style="padding: 12px 0;">VEHICLE</th>
+                    <th style="padding: 12px 0;">TOLL</th>
+                    <th style="padding: 12px 0;">OTHER</th>
+                    <th style="padding: 12px 0;">MAINT. (LINKED)</th>
+                    <th style="padding: 12px 0;">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in trip_expenses %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px 0; font-weight: 500;">TR{{ data.trip.id|stringformat:"03d" }}</td>
+                    <td style="padding: 16px 0;">{{ data.vehicle.registration_number }}</td>
+                    <td style="padding: 16px 0;">{{ data.tolls|floatformat:0 }}</td>
+                    <td style="padding: 16px 0;">{{ data.other|floatformat:0 }}</td>
+                    <td style="padding: 16px 0;">{{ data.maint|floatformat:0 }}</td>
+                    <td style="padding: 16px 0; display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ data.total|floatformat:0 }}</span>
+                        <span class="badge 
+                            {% if data.status == 'Available' or data.status == 'Completed' %}badge-success
+                            {% elif data.status == 'On Trip' or data.status == 'Dispatched' %}badge-info
+                            {% else %}badge-ghost{% endif %}" style="font-weight: 600;">
+                            {{ data.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No trips or expenses found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MAINTENANCE LOGS SECTION -->
+<div style="margin-bottom: 32px;">
+    <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 16px;">
+        <h3 style="margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">MAINTENANCE LOGS</h3>
+    </div>
+    
+    <div class="table-container" style="background: transparent; box-shadow: none;">
+        <table class="table" style="width: 100%; text-align: left;">
+            <thead>
+                <tr style="color: var(--text-muted); font-size: 12px; text-transform: uppercase;">
+                    <th style="padding: 12px 0;">VEHICLE</th>
+                    <th style="padding: 12px 0;">TYPE</th>
+                    <th style="padding: 12px 0;">DESCRIPTION</th>
+                    <th style="padding: 12px 0;">DATE</th>
+                    <th style="padding: 12px 0;">STATUS</th>
+                    <th style="padding: 12px 0;">COST</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in maintenance_logs %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px 0; font-weight: 500;">{{ log.vehicle.registration_number }}</td>
+                    <td style="padding: 16px 0;">{{ log.maintenance_type }}</td>
+                    <td style="padding: 16px 0;">{{ log.description|truncatechars:30 }}</td>
+                    <td style="padding: 16px 0;">{{ log.started_at|date:"d M Y" }}</td>
+                    <td style="padding: 16px 0;">
+                        <span class="badge {% if log.status == 'Active' %}badge-warning{% else %}badge-success{% endif %}">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td style="padding: 16px 0;">{{ log.cost|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No maintenance logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- FOOTER ROW -->
+<div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-color); padding-top: 16px; margin-top: 32px;">
+    <div style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 14px; font-weight: 600; color: var(--text-muted);">
+        TOTAL OPERATIONAL COST (AUTO) = FUEL + MAINT + TOLL + OTHER
+    </div>
+    <div style="font-size: 20px; font-weight: 700; color: #D97706;">
+        {{ grand_total|floatformat:0 }}
+    </div>
+</div>
+
 {% endblock %}

@@ -25,6 +25,7 @@ class Expense(models.Model):
     )
     
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
+    trip = models.ForeignKey(Trip, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
     expense_type = models.CharField(max_length=50, choices=EXPENSE_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()

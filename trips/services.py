@@ -4,6 +4,8 @@ from django.utils import timezone
 from .models import Trip
 from vehicles.models import Vehicle
 from drivers.models import Driver
+from finance.models import FuelLog
+from decimal import Decimal
 
 def create_trip(source, destination, vehicle_id, driver_id, cargo_weight, planned_distance, revenue, user):
     with transaction.atomic():
@@ -81,6 +83,18 @@ def complete_trip(trip, final_odometer, fuel_consumed):
         trip.actual_distance = final_odometer - previous_odometer if final_odometer > previous_odometer else trip.planned_distance
         trip.fuel_consumed = fuel_consumed
         trip.save()
+        
+        # Automatically create Fuel Log
+        if fuel_consumed and fuel_consumed > 0:
+            cost = Decimal(fuel_consumed) * Decimal('90.00')  # Assuming 90 INR/L for automated entry
+            FuelLog.objects.create(
+                vehicle=vehicle,
+                trip=trip,
+                liters=fuel_consumed,
+                cost=cost,
+                date=timezone.now().date()
+            )
+            
         return trip
 
 def cancel_trip(trip):

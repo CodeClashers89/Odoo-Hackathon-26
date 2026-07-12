@@ -41,6 +41,18 @@ def trip_create(request):
     
     return render(request, 'trips/form.html', {'form': form})
 
+@role_required('Fleet Manager', 'Safety Officer', 'Driver', 'Admin')
+def trip_detail(request, trip_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    
+    # Check driver access
+    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
+        if trip.driver.name != (request.user.get_full_name() or request.user.username):
+            messages.error(request, 'You do not have permission to view this trip.')
+            return redirect('trips_list')
+            
+    return render(request, 'trips/detail.html', {'trip': trip})
+
 @role_required('Fleet Manager', 'Driver', 'Admin')
 def trip_dispatch(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)

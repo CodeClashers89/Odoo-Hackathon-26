@@ -8,7 +8,13 @@ class DriverForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'license_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'license_category': forms.TextInput(attrs={'class': 'form-control'}),
+            'license_category': forms.Select(choices=[
+                ('Heavy', 'Heavy'),
+                ('Light', 'Light'),
+                ('Commercial', 'Commercial'),
+                ('Motorcycle', 'Motorcycle'),
+                ('Other', 'Other')
+            ], attrs={'class': 'form-control'}),
             'license_expiry_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control'}),
         }

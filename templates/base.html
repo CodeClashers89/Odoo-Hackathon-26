@@ -44,7 +44,7 @@
                 {% endif %}
 
                 {% if user.profile.role in 'Fleet Manager,Admin,Financial Analyst' %}
-                <a href="{% url 'finance_list' %}" class="nav-item">Finance</a>
+                <a href="{% url 'finance_list' %}" class="nav-item">Fuel & Expenses</a>
                 <a href="{% url 'reports' %}" class="nav-item">Reports</a>
                 {% endif %}
             </nav>

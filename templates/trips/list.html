@@ -42,6 +42,7 @@
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'trip_detail' trip.id %}" class="btn btn-ghost btn-sm">View</a>
                             {% if trip.status == 'Draft' %}
                                 <form method="post" action="{% url 'trip_dispatch' trip.id %}">
                                     {% csrf_token %}

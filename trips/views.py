@@ -12,11 +12,11 @@ def trip_list(request):
     
     # Drivers only see their own trips
     if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
-        trips = trips.filter(driver__name=request.user.get_full_name() or request.user.username)
+        trips = trips.filter(driver__user=request.user)
         
     return render(request, 'trips/list.html', {'trips': trips})
 
-@role_required('Fleet Manager', 'Driver', 'Admin')
+@role_required('Fleet Manager', 'Admin')
 def trip_create(request):
     if request.method == 'POST':
         form = TripCreateForm(request.POST)
@@ -27,6 +27,7 @@ def trip_create(request):
                     destination=form.cleaned_data['destination'],
                     vehicle_id=form.cleaned_data['vehicle'].id,
                     driver_id=form.cleaned_data['driver'].id,
+                    security_officer_id=form.cleaned_data['security_officer'].id,
                     cargo_weight=form.cleaned_data['cargo_weight'],
                     planned_distance=form.cleaned_data['planned_distance'],
                     revenue=form.cleaned_data['revenue'],
@@ -47,7 +48,7 @@ def trip_detail(request, trip_id):
     
     # Check driver access
     if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
-        if trip.driver.name != (request.user.get_full_name() or request.user.username):
+        if trip.driver.user != request.user:
             messages.error(request, 'You do not have permission to view this trip.')
             return redirect('trips_list')
             
@@ -56,6 +57,11 @@ def trip_detail(request, trip_id):
 @role_required('Fleet Manager', 'Driver', 'Admin')
 def trip_dispatch(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
+    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
+        if trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+            
     if request.method == 'POST':
         try:
             dispatch_trip(trip)
@@ -67,6 +73,11 @@ def trip_dispatch(request, trip_id):
 @role_required('Fleet Manager', 'Driver', 'Admin')
 def trip_complete(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
+    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
+        if trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+            
     if request.method == 'POST':
         form = TripCompleteForm(request.POST)
         if form.is_valid():
@@ -88,6 +99,11 @@ def trip_complete(request, trip_id):
 @role_required('Fleet Manager', 'Driver', 'Admin')
 def trip_cancel(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
+    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
+        if trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+            
     if request.method == 'POST':
         try:
             cancel_trip(trip)
@@ -95,3 +111,4 @@ def trip_cancel(request, trip_id):
         except ValidationError as e:
             messages.error(request, str(e))
     return redirect('trips_list')
+

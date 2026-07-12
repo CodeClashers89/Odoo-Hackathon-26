@@ -1,16 +1,18 @@
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.models import User
 from .models import Trip
 from vehicles.models import Vehicle
 from drivers.models import Driver
 from finance.models import FuelLog
 from decimal import Decimal
 
-def create_trip(source, destination, vehicle_id, driver_id, cargo_weight, planned_distance, revenue, user):
+def create_trip(source, destination, vehicle_id, driver_id, security_officer_id, cargo_weight, planned_distance, revenue, user):
     with transaction.atomic():
         vehicle = Vehicle.objects.select_for_update().get(id=vehicle_id)
         driver = Driver.objects.select_for_update().get(id=driver_id)
+        security_officer = User.objects.get(id=security_officer_id)
         
         if cargo_weight > vehicle.max_load_capacity:
             raise ValidationError(f"Cargo weight ({cargo_weight}kg) exceeds vehicle capacity ({vehicle.max_load_capacity}kg).")
@@ -26,6 +28,7 @@ def create_trip(source, destination, vehicle_id, driver_id, cargo_weight, planne
             destination=destination,
             vehicle=vehicle,
             driver=driver,
+            security_officer=security_officer,
             cargo_weight=cargo_weight,
             planned_distance=planned_distance,
             revenue=revenue,

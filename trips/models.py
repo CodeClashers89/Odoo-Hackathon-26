@@ -15,6 +15,7 @@ class Trip(models.Model):
     destination = models.CharField(max_length=200)
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='trips')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='trips')
+    security_officer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='supervised_trips')
     
     cargo_weight = models.DecimalField(max_digits=10, decimal_places=2, help_text="in kg")
     planned_distance = models.DecimalField(max_digits=10, decimal_places=2, help_text="in km")

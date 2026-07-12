@@ -1,12 +1,24 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import Trip
 from vehicles.models import Vehicle
 from drivers.models import Driver
 
+class SafetyOfficerChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.get_full_name()} ({obj.username})" if obj.get_full_name() else obj.username
+
 class TripCreateForm(forms.ModelForm):
+    security_officer = SafetyOfficerChoiceField(
+        queryset=User.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True,
+        label="Security Officer"
+    )
+
     class Meta:
         model = Trip
-        fields = ['source', 'destination', 'vehicle', 'driver', 'cargo_weight', 'planned_distance', 'revenue']
+        fields = ['source', 'destination', 'vehicle', 'driver', 'security_officer', 'cargo_weight', 'planned_distance', 'revenue']
         widgets = {
             'source': forms.TextInput(attrs={'class': 'form-control'}),
             'destination': forms.TextInput(attrs={'class': 'form-control'}),
@@ -19,6 +31,8 @@ class TripCreateForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['security_officer'].queryset = User.objects.filter(profile__role='Safety Officer')
+        
         # Only show available vehicles and drivers
         self.fields['vehicle'].queryset = Vehicle.objects.filter(status='Available')
         

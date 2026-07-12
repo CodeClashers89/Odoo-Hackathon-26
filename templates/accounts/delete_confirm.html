@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Account - TransitOps{% endblock %}
+{% block page_title %}Confirm Delete Account{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px;">
+    <h3>Are you sure you want to delete user account: <strong>{{ user_to_delete.username }}</strong>?</h3>
+    <p style="color: var(--text-muted); margin-top: 12px; margin-bottom: 24px;">
+        Deleting this account will permanently remove their access to the system. 
+        If this account is linked to a driver profile, that driver profile will also be removed. This action cannot be undone.
+    </p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <a href="{% url 'accounts_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="background-color: var(--danger);">Confirm Delete</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

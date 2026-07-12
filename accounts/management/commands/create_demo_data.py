@@ -79,7 +79,26 @@ class Command(BaseCommand):
             exp = timezone.now().date() + datetime.timedelta(days=random.randint(-100, 1000))
             status = random.choice(['Available', 'Available', 'Available', 'On Trip'])
             
+            # For the first driver, we link the pre-created 'driver' user
+            if i == 0:
+                user = users_map['driver']
+            else:
+                # Create a new user for other drivers
+                username = name.lower().replace(' ', '')
+                user = User.objects.filter(username=username).first()
+                if not user:
+                    user = User.objects.create_user(username=username, email=f"{username}@transitops.com", password="driverpass")
+                    profile = user.profile
+                    profile.role = 'Driver'
+                    profile.phone_number = f"555-01{i:02d}"
+                    profile.save()
+            
+            user.first_name = name.split(' ')[0]
+            user.last_name = name.split(' ')[1]
+            user.save()
+            
             d = Driver.objects.create(
+                user=user,
                 name=name,
                 license_number=lic,
                 license_category=cat,
@@ -105,6 +124,7 @@ class Command(BaseCommand):
                 destination=dest,
                 vehicle=v,
                 driver=d,
+                security_officer=users_map['safety'],
                 cargo_weight=Decimal(str(random.uniform(500, float(v.max_load_capacity)))),
                 planned_distance=Decimal(str(random.uniform(50, 1000))),
                 revenue=Decimal(str(random.uniform(5000, 50000))),

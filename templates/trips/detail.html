@@ -156,6 +156,12 @@
                     <th style="text-align: left; padding: 12px 0;">Driver</th>
                     <td style="text-align: right;">{{ trip.driver.name }}</td>
                 </tr>
+                {% if trip.security_officer %}
+                <tr>
+                    <th style="text-align: left; padding: 12px 0;">Security Officer</th>
+                    <td style="text-align: right;">{{ trip.security_officer.get_full_name|default:trip.security_officer.username }}</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

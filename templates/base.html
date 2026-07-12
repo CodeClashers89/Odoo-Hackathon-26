@@ -47,6 +47,10 @@
                 <a href="{% url 'finance_list' %}" class="nav-item">Fuel & Expenses</a>
                 <a href="{% url 'reports' %}" class="nav-item">Reports</a>
                 {% endif %}
+
+                {% if user.profile.role == 'Admin' %}
+                <a href="{% url 'accounts_list' %}" class="nav-item">Staff Management</a>
+                {% endif %}
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">

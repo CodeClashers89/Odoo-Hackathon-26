@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Management - TransitOps{% endblock %}
+{% block page_title %}Staff Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        <div style="font-weight: 500; font-size: 16px; color: var(--text-muted);">Manage login accounts and system roles</div>
+        <a href="{% url 'accounts_create' %}" class="btn btn-primary">Add Staff Member</a>
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Region</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--primary);">{{ u.username }}</td>
+                    <td>{{ u.get_full_name|default:"-" }}</td>
+                    <td>{{ u.email|default:"-" }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if u.profile.role == 'Admin' %}badge-danger
+                            {% elif u.profile.role == 'Fleet Manager' %}badge-primary
+                            {% elif u.profile.role == 'Safety Officer' %}badge-warning
+                            {% elif u.profile.role == 'Financial Analyst' %}badge-info
+                            {% else %}badge-success{% endif %}">
+                            {{ u.profile.role }}
+                        </span>
+                    </td>
+                    <td>{{ u.profile.phone_number|default:"-" }}</td>
+                    <td>{{ u.profile.region|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'accounts_edit' u.id %}" class="btn btn-ghost btn-sm">Edit</a>
+                        {% if u != user %}
+                        <a href="{% url 'accounts_delete' u.id %}" class="btn btn-ghost btn-sm" style="color: var(--danger); margin-left: 8px;">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -11,7 +11,12 @@ def index(request):
     vehicle_type = request.GET.get('vehicle_type')
     region = request.GET.get('region')
     
+    is_driver = hasattr(request.user, 'profile') and request.user.profile.role == 'Driver'
+    
     vehicles = Vehicle.objects.all()
+    if is_driver:
+        vehicles = vehicles.filter(trips__driver__user=request.user).distinct()
+        
     if vehicle_type:
         vehicles = vehicles.filter(vehicle_type=vehicle_type)
     if region:
@@ -21,21 +26,33 @@ def index(request):
     available_vehicles = vehicles.filter(status='Available').count()
     maintenance_vehicles = vehicles.filter(status='In Shop').count()
     
-    active_trips = Trip.objects.filter(status='Dispatched').count()
-    pending_trips = Trip.objects.filter(status='Draft').count()
-    drivers_on_duty = Driver.objects.filter(status='On Trip').count()
+    if is_driver:
+        active_trips = Trip.objects.filter(driver__user=request.user, status='Dispatched').count()
+        pending_trips = Trip.objects.filter(driver__user=request.user, status='Draft').count()
+        drivers_on_duty = 1 if Driver.objects.filter(user=request.user, status='On Trip').exists() else 0
+    else:
+        active_trips = Trip.objects.filter(status='Dispatched').count()
+        pending_trips = Trip.objects.filter(status='Draft').count()
+        drivers_on_duty = Driver.objects.filter(status='On Trip').count()
     
     total_active_fleet = vehicles.exclude(status='Retired').count()
     fleet_utilization = 0
     if total_active_fleet > 0:
         fleet_utilization = (active_vehicles / total_active_fleet) * 100
         
-    recent_revenue_trips = Trip.objects.exclude(revenue__isnull=True).order_by('-created_at')[:15]
+    if is_driver:
+        recent_revenue_trips = Trip.objects.filter(driver__user=request.user).exclude(revenue__isnull=True).order_by('-created_at')[:15]
+    else:
+        recent_revenue_trips = Trip.objects.exclude(revenue__isnull=True).order_by('-created_at')[:15]
+        
     recent_revenue_trips = list(recent_revenue_trips)[::-1]
     revenue_labels = [f"Trip {t.id}" for t in recent_revenue_trips]
     revenue_data = [float(t.revenue) for t in recent_revenue_trips]
     
-    total_revenue_aggr = Trip.objects.aggregate(total=Sum('revenue'))
+    if is_driver:
+        total_revenue_aggr = Trip.objects.filter(driver__user=request.user).aggregate(total=Sum('revenue'))
+    else:
+        total_revenue_aggr = Trip.objects.aggregate(total=Sum('revenue'))
     total_revenue = float(total_revenue_aggr['total'] or 0)
         
     context = {
@@ -51,3 +68,4 @@ def index(request):
         'total_revenue': total_revenue,
     }
     return render(request, 'dashboard/index.html', context)
+

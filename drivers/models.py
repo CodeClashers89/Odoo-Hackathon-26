@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from datetime import date
 
 class Driver(models.Model):
@@ -9,6 +10,7 @@ class Driver(models.Model):
         ('Suspended', 'Suspended'),
     )
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='driver_profile')
     name = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
     license_category = models.CharField(max_length=50)

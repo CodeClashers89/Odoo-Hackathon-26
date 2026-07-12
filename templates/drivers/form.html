@@ -7,7 +7,32 @@
 <div class="card" style="max-width: 500px;">
     <form method="post">
         {% csrf_token %}
+        <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Account Credentials</h3>
         
+        <div class="grid grid-cols-2" style="gap: 16px;">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+            {{ form.password }}
+            {% if form.password.help_text %}
+                <span class="help-text" style="display: block; margin-top: 4px; font-size: 12px; color: var(--text-muted);">{{ form.password.help_text }}</span>
+            {% endif %}
+            {{ form.password.errors }}
+        </div>
+
+        <h3 style="margin-top: 24px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Driver Details</h3>
+
         <div class="form-group">
             <label class="form-label" for="{{ form.name.id_for_label }}">Full Name</label>
             {{ form.name }}

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
 from .models import Driver
 from .forms import DriverForm
 from accounts.decorators import role_required
@@ -14,8 +15,29 @@ def driver_create(request):
     if request.method == 'POST':
         form = DriverForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Driver created successfully.')
+            driver = form.save(commit=False)
+            
+            # Create User account
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.first_name = driver.name.split(' ')[0] if ' ' in driver.name else driver.name
+            user.last_name = driver.name.split(' ')[1] if ' ' in driver.name else ''
+            user.save()
+            
+            # Set profile role to Driver
+            profile = user.profile
+            profile.role = 'Driver'
+            profile.phone_number = driver.contact_number
+            profile.save()
+            
+            # Associate User with Driver
+            driver.user = user
+            driver.save()
+            
+            messages.success(request, 'Driver and user account created successfully.')
             return redirect('drivers_list')
     else:
         form = DriverForm()
@@ -27,8 +49,37 @@ def driver_edit(request, driver_id):
     if request.method == 'POST':
         form = DriverForm(request.POST, instance=driver)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Driver updated successfully.')
+            driver = form.save(commit=False)
+            
+            # Create or update associated user account
+            if not driver.user:
+                username = form.cleaned_data.get('username')
+                email = form.cleaned_data.get('email')
+                password = form.cleaned_data.get('password')
+                user = User.objects.create_user(username=username, email=email, password=password)
+                user.first_name = driver.name.split(' ')[0] if ' ' in driver.name else driver.name
+                user.last_name = driver.name.split(' ')[1] if ' ' in driver.name else ''
+                user.save()
+                
+                profile = user.profile
+                profile.role = 'Driver'
+                profile.phone_number = driver.contact_number
+                profile.save()
+                driver.user = user
+            else:
+                user = driver.user
+                user.email = form.cleaned_data.get('email')
+                password = form.cleaned_data.get('password')
+                if password:
+                    user.set_password(password)
+                user.save()
+                
+                profile = user.profile
+                profile.phone_number = driver.contact_number
+                profile.save()
+                
+            driver.save()
+            messages.success(request, 'Driver and user account updated successfully.')
             return redirect('drivers_list')
     else:
         form = DriverForm(instance=driver)
@@ -44,3 +95,4 @@ def driver_update_status(request, driver_id):
             driver.save()
             messages.success(request, f'Status for {driver.name} updated to {new_status}.')
     return redirect('drivers_list')
+

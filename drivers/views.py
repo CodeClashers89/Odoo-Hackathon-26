@@ -128,9 +128,12 @@ def driver_profile(request, driver_id):
     )
     total_revenue = sum(t.revenue for t in completed_trips)
     
+    infractions = driver.infractions.all().order_by('-date_reported')
+    
     context = {
         'driver': driver,
         'trips': trips,
+        'infractions': infractions,
         'stats': {
             'total_trips': total_trips,
             'completed_trips_count': completed_trips_count,

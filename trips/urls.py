@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:trip_id>/dispatch/', views.trip_dispatch, name='trip_dispatch'),
     path('<int:trip_id>/complete/', views.trip_complete, name='trip_complete'),
     path('<int:trip_id>/cancel/', views.trip_cancel, name='trip_cancel'),
+    path('<int:trip_id>/deduct-points/', views.trip_deduct_points, name='trip_deduct_points'),
 ]

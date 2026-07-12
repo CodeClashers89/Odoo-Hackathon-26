@@ -30,3 +30,17 @@ class Driver(models.Model):
 
     def is_license_expired(self):
         return self.license_expiry_date < date.today()
+
+class DriverInfraction(models.Model):
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='infractions')
+    trip = models.ForeignKey('trips.Trip', on_delete=models.SET_NULL, null=True, blank=True, related_name='infractions')
+    points_deducted = models.IntegerField()
+    reason = models.TextField()
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    date_reported = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_reported']
+
+    def __str__(self):
+        return f"{self.driver.name} - {self.points_deducted} pts ({self.date_reported.strftime('%Y-%m-%d')})"

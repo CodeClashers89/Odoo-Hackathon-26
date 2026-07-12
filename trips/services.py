@@ -104,6 +104,8 @@ def complete_trip(trip, final_odometer, fuel_consumed):
         vehicle.save()
         
         driver.status = 'Available'
+        if driver.safety_score < 100:
+            driver.safety_score += 1
         driver.save()
         
         trip.status = 'Completed'

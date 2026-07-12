@@ -97,7 +97,31 @@
         height: 4px;
         z-index: -1;
     }
-    
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+    /* Modal Content Box */
+    .modal-content {
+        background-color: var(--surface, #ffffff);
+        padding: 30px;
+        border-radius: 12px;
+        width: 450px;
+        max-width: 90%;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color, #e5e7eb);
+    }
 </style>
 {% endblock %}
 
@@ -164,6 +188,11 @@
                 {% endif %}
             </tbody>
         </table>
+        {% if trip.security_officer == user or user.profile.role == 'Admin' or user.profile.role == 'Fleet Manager' %}
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color, #e5e7eb); display: flex; justify-content: flex-end;">
+            <button id="open-deduct-modal" class="btn btn-danger" style="background-color: var(--danger, #EF4444); color: white;">Deduct Driver Points</button>
+        </div>
+        {% endif %}
     </div>
     
     <!-- Metrics Card -->
@@ -215,9 +244,36 @@
     <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid var(--border-color); z-index: 1;"></div>
 </div>
 
-<div style="margin-top: 24px;">
+<div style="margin-top: 24px; margin-bottom: 24px;">
     <a href="{% url 'trips_list' %}" class="btn btn-ghost">&larr; Back to Trips</a>
 </div>
+
+{% if trip.security_officer == user or user.profile.role == 'Admin' or user.profile.role == 'Fleet Manager' %}
+<!-- Deduct Points Modal -->
+<div id="deduct-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; color: var(--text);">Deduct Driver Safety Points</h3>
+        <form method="POST" action="{% url 'trip_deduct_points' trip.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label" style="display: block; margin-bottom: 6px; font-weight: 500;" for="points">Points to Deduct</label>
+                <input type="number" name="points" id="points" class="form-control" min="1" max="100" required style="width: 100%; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px;" placeholder="e.g. 5">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label" style="display: block; margin-bottom: 6px; font-weight: 500;" for="reason">Reason for Deduction</label>
+                <textarea name="reason" id="reason" class="form-control" rows="3" required style="width: 100%; resize: vertical; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px;" placeholder="Provide details of the safety infraction..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" id="close-deduct-modal" class="btn btn-ghost" style="padding: 8px 16px;">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="background-color: var(--danger, #EF4444); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">Deduct Points</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}
 
@@ -280,6 +336,31 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (bounds.length > 0) {
         map.fitBounds(bounds, {padding: [50, 50]});
+    }
+
+    // Modal Control logic
+    const openBtn = document.getElementById('open-deduct-modal');
+    const closeBtn = document.getElementById('close-deduct-modal');
+    const modal = document.getElementById('deduct-modal');
+    
+    if (openBtn && modal) {
+        openBtn.addEventListener('click', function() {
+            modal.style.display = 'flex';
+        });
+    }
+    
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     }
 });
 </script>

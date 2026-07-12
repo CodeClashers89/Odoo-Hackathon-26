@@ -56,11 +56,15 @@ def trip_detail(request, trip_id):
             
     return render(request, 'trips/detail.html', {'trip': trip})
 
-@role_required('Fleet Manager', 'Driver', 'Admin')
+@role_required('Fleet Manager', 'Safety Officer', 'Driver', 'Admin')
 def trip_dispatch(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
-    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
-        if trip.driver.user != request.user:
+    if hasattr(request.user, 'profile'):
+        role = request.user.profile.role
+        if role == 'Driver' and trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+        elif role == 'Safety Officer' and trip.security_officer != request.user:
             messages.error(request, 'You do not have permission to modify this trip.')
             return redirect('trips_list')
             
@@ -72,11 +76,15 @@ def trip_dispatch(request, trip_id):
             messages.error(request, str(e))
     return redirect('trips_list')
 
-@role_required('Fleet Manager', 'Driver', 'Admin')
+@role_required('Fleet Manager', 'Safety Officer', 'Driver', 'Admin')
 def trip_complete(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
-    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
-        if trip.driver.user != request.user:
+    if hasattr(request.user, 'profile'):
+        role = request.user.profile.role
+        if role == 'Driver' and trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+        elif role == 'Safety Officer' and trip.security_officer != request.user:
             messages.error(request, 'You do not have permission to modify this trip.')
             return redirect('trips_list')
             
@@ -98,11 +106,15 @@ def trip_complete(request, trip_id):
     
     return render(request, 'trips/complete_form.html', {'form': form, 'trip': trip})
 
-@role_required('Fleet Manager', 'Driver', 'Admin')
+@role_required('Fleet Manager', 'Safety Officer', 'Driver', 'Admin')
 def trip_cancel(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
-    if hasattr(request.user, 'profile') and request.user.profile.role == 'Driver':
-        if trip.driver.user != request.user:
+    if hasattr(request.user, 'profile'):
+        role = request.user.profile.role
+        if role == 'Driver' and trip.driver.user != request.user:
+            messages.error(request, 'You do not have permission to modify this trip.')
+            return redirect('trips_list')
+        elif role == 'Safety Officer' and trip.security_officer != request.user:
             messages.error(request, 'You do not have permission to modify this trip.')
             return redirect('trips_list')
             
@@ -113,4 +125,49 @@ def trip_cancel(request, trip_id):
         except ValidationError as e:
             messages.error(request, str(e))
     return redirect('trips_list')
+
+@role_required('Fleet Manager', 'Safety Officer', 'Admin')
+def trip_deduct_points(request, trip_id):
+    if request.method == 'POST':
+        trip = get_object_or_404(Trip, id=trip_id)
+        
+        # Only allow security officer assigned to trip or Admin/Fleet Manager
+        is_admin_or_fleet = getattr(request.user, 'profile', None) and request.user.profile.role in ['Admin', 'Fleet Manager']
+        if trip.security_officer != request.user and not is_admin_or_fleet:
+            messages.error(request, 'You do not have permission to deduct points for this trip.')
+            return redirect('trip_detail', trip_id=trip.id)
+            
+        driver = trip.driver
+        points = request.POST.get('points')
+        reason = request.POST.get('reason')
+        
+        if points and reason:
+            try:
+                points_int = int(points)
+                if points_int <= 0:
+                    raise ValueError
+                
+                # Import here to avoid circular imports if needed
+                from drivers.models import DriverInfraction
+                
+                # Deduct points
+                driver.safety_score = max(0, driver.safety_score - points_int)
+                driver.save()
+                
+                # Record the infraction
+                DriverInfraction.objects.create(
+                    driver=driver,
+                    trip=trip,
+                    points_deducted=points_int,
+                    reason=reason,
+                    reported_by=request.user
+                )
+                
+                messages.success(request, f'Successfully deducted {points_int} points from {driver.name}.')
+            except ValueError:
+                messages.error(request, 'Invalid points value. Must be a positive integer.')
+        else:
+            messages.error(request, 'Both points and reason are required.')
+            
+    return redirect('trip_detail', trip_id=trip_id)
 
